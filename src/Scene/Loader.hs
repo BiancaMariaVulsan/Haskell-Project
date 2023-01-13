@@ -202,19 +202,6 @@ objectParser = oneOf (pMap Hittable.Sphere sphereParser) []
 --         ("fuzz", opt number)
 --     dielectricMaterialParser =
 --       dict1Parser DielectricMaterial ("dielectric", number)
-
--- materialParser :: Parser Material
--- materialParser = oneOf [diffuseMaterialParser, metallicMaterialParser, dielectricMaterialParser]
-
--- diffuseMaterialParser :: Parser Material
--- diffuseMaterialParser = dict1Parser Diffuse ("diffuse", colorParser)
-
--- metallicMaterialParser :: Parser Material
--- metallicMaterialParser = dict2Parser Metallic ("metallic", colorParser) ("fuzz", opt number)
-
--- dielectricMaterialParser :: Parser Material
--- dielectricMaterialParser = dict1Parser Dielectric ("ir", doubleParser)
-
 materialParser :: Parser Material
 materialParser = oneOf
   diffuseMaterialParser
@@ -223,11 +210,11 @@ materialParser = oneOf
   ]
   where
     diffuseMaterialParser :: Parser Material
-    diffuseMaterialParser = dict1Parser diffuse ("diffuse", colorParser)
+    diffuseMaterialParser = dict1Parser id ("diffuse", dict1Parser diffuse ("color", colorParser))
 
     metallicMaterialParser :: Parser Material
-    metallicMaterialParser = (dict2Parser fuzzyMetal ("metallic", colorParser) ("fuzz", doubleParser))
-                      `orElse` (dict1Parser metal ("metallic", colorParser))
+    metallicMaterialParser = dict1Parser id ("metallic", (dict2Parser fuzzyMetal ("color", colorParser) ("fuzz", doubleParser))
+                      `orElse` (dict1Parser metal ("color", colorParser)))
 
     dielectricMaterialParser :: Parser Material
-    dielectricMaterialParser = dict1Parser glass ("ir", doubleParser)
+    dielectricMaterialParser = dict1Parser id ("dielectric", dict1Parser glass ("ir", doubleParser))

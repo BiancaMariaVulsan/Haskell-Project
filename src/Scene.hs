@@ -67,7 +67,16 @@ sceneParser :: Parser SceneConfig
 sceneParser = pMap2 SceneConfig cameraParser (ws `pThen` (sepBySome ws objectParser))
 
 getSceneConfig :: TestableMonadIO io => Maybe String -> io (Result LoadingError SceneConfig)
-getSceneConfig _ = error "implement getSceneConfig"
+getSceneConfig Nothing = return $ Success defaultSceneConfig
+getSceneConfig (Just filePath) = loadSceneConfig filePath
 
 loadSceneConfig :: TestableMonadIO io => String -> io (Result LoadingError SceneConfig)
-loadSceneConfig _ = error "implement loadSceneConfig"
+loadSceneConfig path = do
+  fileExists <- liftIO $ doesFileExist path
+  if fileExists then do
+    fileContent <- liftIO $ readFile path
+    case runParser sceneParser fileContent of
+      Success (img, _) -> return $ Success img
+      Error e -> return $ Error $ ParseFailed e
+  else return $ Error FileNotFound
+  where liftIO = id

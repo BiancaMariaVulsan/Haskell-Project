@@ -38,7 +38,16 @@ imageParser = many lower `pThen` ws `pThen` dict4Parser setupImage
               ("max_depth", number)
 
 getImageConfig :: TestableMonadIO io => Maybe String -> io (Result LoadingError Image)
-getImageConfig _ = error "implement getImageConfig"
+getImageConfig Nothing = return $ Success defaultImage
+getImageConfig (Just filePath) = loadImageConfig filePath
 
 loadImageConfig :: TestableMonadIO io => String -> io (Result LoadingError Image)
-loadImageConfig _ = error "implement loadImageConfig"
+loadImageConfig path = do
+  fileExists <- liftIO $ doesFileExist path
+  if fileExists then do
+    fileContent <- liftIO $ readFile path
+    case runParser imageParser fileContent of
+      Success (img, _) -> return $ Success img
+      Error e -> return $ Error $ ParseFailed e
+  else return $ Error FileNotFound
+  where liftIO = id

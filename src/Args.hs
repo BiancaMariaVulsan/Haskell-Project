@@ -60,10 +60,10 @@ procArgs args =
     case toArgMap args of
       Success argMap1 -> Success $ Args argImageConfigFile argSceneFile argOutFile argNrSamples
         where
-          argImageConfigFile = getArg "-imageConfigFile" argMap1
-          argSceneFile = getArg "-sceneFile" argMap1
-          argOutFile = getArg "-outFile" argMap1
-          argNrSamples = readArg "-imageNrSamples" argMap1
+          argImageConfigFile = getArg "imageConfigFile" argMap1
+          argSceneFile = getArg "sceneFile" argMap1
+          argOutFile = getArg "outFile" argMap1
+          argNrSamples = readArg "imageNrSamples" argMap1
       Error _ -> Error InvalidArgs
       
 
